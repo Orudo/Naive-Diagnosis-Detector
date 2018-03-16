@@ -21,23 +21,37 @@ codes=[x.strip() for x in codes]
 
 
 class DiagInquryer:
+    def confinit(self):
+        jsonData=open("conf").read()
+        conf=json.loads(jsonData)
+
+        self.conf=conf
+
     def __init__(self):
         
 
-        jieba.load_userdict("/home/martin/NLPTest/data/jiebaDic")
+        #jieba.load_userdict("/home/martin/NLPTest/data/jiebaDic")
+        jieba.load_userdict(self.conf["path"]["jiebaDic"])
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-        with open("/home/martin/NLPTest/data/DiagTrainingSet.Code") as f:
+        #with open("/home/martin/NLPTest/data/DiagTrainingSet.Code") as f:
+        '''with open(self.conf["path"]["diagnosisTrainingSetCode"]) as f:
             codes=f.readlines()
-        self.codes=[x.strip() for x in codes]
+        self.codes=[x.strip() for x in codes]'''
+
+        trainingSet=json.loads(open(self.conf["path"]["trainingSet"]).read())
+        self.codes=map(lambda x:x[1],trainingSet)
+        contents=map(lambda x:x[0],trainingSet)
+
+
 
         
         with open("/home/martin/NLPTest/data/stopword.list") as f:
             stopword=f.readlines()
         self.stopword=[x.strip() for x in stopword]
        
-        with open("/home/martin/NLPTest/data/trainingSet.data") as f:
+        '''with open("/home/martin/NLPTest/data/trainingSet.data") as f:
             contents=f.readlines()
-        contents=[x.strip() for x in contents]
+        contents=[x.strip() for x in contents]'''
         #contents=[TFIDFSplitter.split(i) for i in contents]
         for i in range(0,len(contents)):
             print(contents[i])
