@@ -30,7 +30,7 @@ class DiagInquryer:
         self.conf=conf
 
     def __init__(self):
-        self.confinit()
+        #self.confinit()
         dMani=dataManipulator.dataManipulator()
         #jieba.load_userdict("/home/martin/NLPTest/data/jiebaDic")
         jieba.load_userdict(dMani.conf["path"]["jiebaDic"])
