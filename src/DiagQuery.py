@@ -5,6 +5,7 @@ import TFIDFSplitter
 import logging
 import jieba
 import time
+import dataManipulator
 import json
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 jieba.add_word(u'裂伤',3,'n')
@@ -30,23 +31,23 @@ class DiagInquryer:
 
     def __init__(self):
         self.confinit()
-
+        dMani=dataManipulator.dataManipulator()
         #jieba.load_userdict("/home/martin/NLPTest/data/jiebaDic")
-        jieba.load_userdict(self.conf["path"]["jiebaDic"])
+        jieba.load_userdict(dMani.conf["path"]["jiebaDic"])
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
         #with open("/home/martin/NLPTest/data/DiagTrainingSet.Code") as f:
         '''with open(self.conf["path"]["diagnosisTrainingSetCode"]) as f:
             codes=f.readlines()
         self.codes=[x.strip() for x in codes]'''
 
-        trainingSet=json.loads(open(self.conf["path"]["trainingSet"]).read())
+        trainingSet=json.loads(open(dMani.conf["path"]["trainingSet"]).read())
         self.codes=list(map(lambda x:x[1],trainingSet))
         contents=list(map(lambda x:x[0],trainingSet))
 
 
 
         #with open("/home/martin/NLPTest/data/stopword.list") as f:
-        with open(self.conf["path"]["stopwordList"]) as f:
+        with open(dMani.conf["path"]["stopwordList"]) as f:
             stopword=f.readlines()
         self.stopword=[x.strip() for x in stopword]
        

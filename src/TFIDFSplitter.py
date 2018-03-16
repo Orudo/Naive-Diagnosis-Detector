@@ -1,6 +1,7 @@
 import jieba.analyse
+import dataManipulator
 
-with open("/home/martin/NLPTest/data/stopword.list") as f:
+with open(dataManipulator.dataManipulator.conf["path"]["stopwordList"]) as f:
     stopword=f.readlines()
 stopword=[x.strip() for x in stopword]
 
