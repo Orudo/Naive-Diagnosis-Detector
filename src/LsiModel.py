@@ -37,3 +37,6 @@ class LsiModel:
         sims = self.indexing[idVec]
         sims = sorted(enumerate(sims), key=lambda item: -item[1])
         return sims
+    def saveProfile(self):
+        #self.dictionary.save('')
+        return 0

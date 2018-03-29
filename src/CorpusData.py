@@ -47,3 +47,5 @@ class CorpusDataManipulator:
         return self.codeWithoutDuplicate[docNo]
     def getCorpus(self):
         return self.corpusWithoutDuplicate
+    def saveCorpusAndCodes(self):
+        return 0
