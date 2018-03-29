@@ -6,7 +6,9 @@ import logging
 import jieba
 import time
 import dataManipulator
+import diagnosesData
 import json
+import math
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 jieba.add_word(u'裂伤',3,'n')
 jieba.add_word(u'头皮',3,'n')
@@ -32,6 +34,7 @@ class DiagInquryer:
     def __init__(self):
         #self.confinit()
         dMani=dataManipulator.dataManipulator()
+        #print()
         #jieba.load_userdict("/home/martin/NLPTest/data/jiebaDic")
         jieba.load_userdict(dMani.conf["path"]["jiebaDic"])
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -56,10 +59,10 @@ class DiagInquryer:
         contents=[x.strip() for x in contents]'''
         #contents=[TFIDFSplitter.split(i) for i in contents]
         for i in range(0,len(contents)):
-            print(contents[i])
+            #print(contents[i])
             contents[i]=TFIDFSplitter.split(contents[i])
-            print(contents[i])
-        self.corpusMani=CorpusData.CorpusDataManipulator(contents)#build all corpus Manipulator
+            #print(contents[i])
+        self.corpusMani=CorpusData.CorpusDataManipulator(contents,self.codes)#build all corpus Manipulator
 
         self.lsi=LsiModel.LsiModel(self.corpusMani)#get LSI Model
 
@@ -67,36 +70,56 @@ class DiagInquryer:
         '''with open("/home/martin/NLPTest/data/stopword.list") as f:
             stopword=f.readlines()
         self.stopword=[x.strip() for x in stopword]'''
-
+    def voting(self,result):
+        result = list(map(lambda x:[x[0],math.tan(x[1]*math.pi/2)],result))
+        print(result)
+        voted={}
+        for i in result:
+            #print(i)
+            #time.sleep(3000)
+            #print(list(voted.keys()))
+            if i[0] not in list(voted.keys()):
+                voted[i[0]]=i[1]
+            else:
+                voted[i[0]]+=i[1]
+        voted=sorted(list(voted.items()),key=lambda x:x[1],reverse=True)
+        print(voted)
+        #return list(voted.items())
+        return voted
     def inquryDiagnosis(self,diagnosis,model=None,corpusMani=None):
         if model is None:
             model=self.lsi
         if corpusMani is None:
             corpusMani=self.corpusMani
 
-        logging.info([x for x in jiebaCutAll(diagnosis,False)])
+        logging.info([x for x in TFIDFSplitter.split(diagnosis)])
         #DiagVec=corpusMani.doc2bow(list(filter(lambda x: x not in self.stopword,jiebaCutAll(diagnosis,False))))
         DiagVec=corpusMani.doc2bow(TFIDFSplitter.split(diagnosis))
 
 
         result = model.predict(DiagVec)# get a list of score and corresponding document
-        return list(map(lambda x: tuple([self.getCode(x[0]),x[1]]),result[:5])) #returns a list with some pair of DiagCode and its score(probability)
+        result=list(map(lambda x: tuple([self.getCode(x[0]),x[1]]),result[:30]))
+        result= self.voting(result)
+        
+        return result#list(map(lambda x: tuple([self.getCode(x[0]),x[1]]),result[:30])) #returns a list with some pair of DiagCode and its score(probability)
     
     def retrain(self):
         self.lsi.versionProcceed()
         self.lsi.reindex()
 
         
-    def addDocuments(self,docs,codes):
-        self.lsi.addDocuments()
+    def addDocuments(self,docs):
+        logging.info("added docs:%s",(docs))
+        self.lsi.addDocuments(docs)
         logging.info('code add!')
         #self.codes.insert(len(self.codes),code)
-        self.codes.extend(codes)
+        #self.codes.extend(codes)
         #self.codes.append(code)
 
     
     def getCode(self,documentNo):
-        return self.codes[documentNo]
+        #return diagnosesData.diagnosesManipulator.diagCodeDic[",".join(self.corpusMani.bow2doc(self.corpusMani.getText(documentNo)))]
+        return self.corpusMani.getCode(documentNo)
         #return documentNo
     def cutDiag(self,diag):
         return list(filter(lambda x: x not in self.stopword,jiebaCutAll(diag,False)))
@@ -119,12 +142,19 @@ class DiagInqury:
             return list(map(lambda x:tuple([x[0],1.*x[1]]),self.inquryer.inquryDiagnosis(ins['diag'])))'''
     def addDocs(self,ins):
         wordVecs=list(map(TFIDFSplitter.split,ins['docs']))
-        print([x for x in wordVecs])#get word Vector
+        #print([x for x in wordVecs])#get word Vector
         self.inquryer.corpusMani.addVecToDic(wordVecs)
         idVecs=[self.inquryer.corpusMani.doc2bow(x) for x in wordVecs]
-        print(idVecs)
-        self.inquryer.corpusMani.addVecToCorpus(idVecs)
-        self.inquryer.addDocuments(idVecs,ins['code'])
+        #print(idVecs)
+
+        diagCodeDic=dict(map(tuple,(map(lambda x,y:[",".join(TFIDFSplitter.split(x)),y],ins['docs'],ins['code']))))
+        diagnosesData.diagnosesManipulator.diagCodeDic.update(diagCodeDic)
+        
+        
+
+
+        addedVec=self.inquryer.corpusMani.addVecToCorpus(idVecs,ins['code'])
+        self.inquryer.addDocuments(addedVec)
         self.inquryer.retrain()
 
 '''def main():

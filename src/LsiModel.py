@@ -7,25 +7,27 @@ class LsiModel:
         self.corpusTimeStamp=corpusManipulator.corpusTimeStamp
         self.corpusManipulator=corpusManipulator
         self.dictionary=corpusManipulator.dictionary
-        self.corpus=corpusManipulator.corpus
-        self.lsiModel=models.LsiModel(corpusManipulator.corpus, id2word=corpusManipulator.dictionary, num_topics=256)
+        self.corpus=corpusManipulator.getCorpus()
+        self.lsiModel=models.LsiModel(corpusManipulator.getCorpus(), id2word=corpusManipulator.dictionary, num_topics=256)
         self.reindex()
         #self.indexing=similarities.MatrixSimilarity(self.lsiModel[corpusManipulator.corpus])
     def isModelUpdated(self):
         return self.corpusTimeStamp==self.corpusManipulator.corpusTimeStamp
     def versionProcceed(self):
         self.corpusTimeStamp=self.corpusManipulator.corpusTimeStamp
-    def addDocuments(self):#add documents to Lsi Model
+    def addDocuments(self,corpus):#add documents to Lsi Model
+        self.lsiModel.add_documents(corpus)
+        self.reindex()
         '''if self.isModelUpdated():
             self.lsiModel.add_documents(self.corpusManipulator.corpus)
         if not self.isModelUpdated():
             self.oldModel=self.lsiModel
             self.lsiModel.id2word=self.corpusManipulator.dictionary
             self.lsiModel.add_documents(self.corpusManipulator.corpus)'''
-        self.lsiModel=models.LsiModel(self.corpusManipulator.corpus, id2word=self.corpusManipulator.dictionary, num_topics=256)
+        #self.lsiModel=models.LsiModel(self.corpusManipulator.corpus, id2word=self.corpusManipulator.dictionary, num_topics=256)
             
     def reindex(self):#reindexing similarity matrix
-        self.indexing=similarities.MatrixSimilarity(self.lsiModel[self.corpusManipulator.corpus])
+        self.indexing=similarities.MatrixSimilarity(self.lsiModel[self.corpusManipulator.getCorpus()])
     def batchPredict(self,idVecs):
         return [self.predict(i) for i in idVecs]
     def predict(self,idVec):
