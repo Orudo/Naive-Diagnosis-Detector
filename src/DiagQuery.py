@@ -7,7 +7,7 @@ import jieba
 import time
 import dataManipulator
 import json
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO, file="../data/log")
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO, filename="../data/log")
 jieba.add_word(u'裂伤',3,'n')
 jieba.add_word(u'头皮',3,'n')
 jieba.add_word(u'软组织',3,'n')
