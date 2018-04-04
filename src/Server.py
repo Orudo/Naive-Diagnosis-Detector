@@ -9,13 +9,8 @@ class Server(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
-        #self.send_header('Content-type', 'text/html')
         self.end_headers()
 
-    '''def do_GET(self):
-        self._set_headers()
-        #self.wfile.write("<html><body><h1>hi!</h1></body></html>")
-'''
     def do_HEAD(self):
         self._set_headers()
         
@@ -25,11 +20,9 @@ class Server(BaseHTTPRequestHandler):
         data_string = (self.rfile.read(int(self.headers['Content-Length']))).decode('utf-8')
         logging.critical(data_string)
         result=self.inquryer.inqury(json.loads(data_string))
-        logging.info(result)
         respon=json.dumps(result)
         logging.critical(respon)
         self.wfile.write(respon.encode('utf-8'))
-        #self.wfile.write("<html><body><h1>POST!</h1></body></html>")
 
         
 def run(server_class=HTTPServer, handler_class=Server, port=8080):

@@ -5,28 +5,18 @@ import TFIDFSplitter
 import logging
 import jieba
 import time
+import initializer
 from gensim.test.utils import get_tmpfile
 import dataManipulator
 #import diagnosesData
 import json
 from pathlib import Path
 import math
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 class DiagInquryer:
-    def confinit(self):
-        jsonData=open("/home/martin/Naive-Diagnosis-Detector/data/Conf.json").read()
-        conf=json.loads(jsonData)
-
-        self.conf=conf
-
     def __init__(self):
         dMani=dataManipulator.dataManipulator
-        jieba.load_userdict(dMani.conf["path"]["jiebaDic"])
-        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
-
-        #tmp_fname = get_tmpfile("lsi.model")
+        
         indicator=Path(dMani.conf["path"]["LsiModel"]).exists()
         if indicator:
             self.corpusMani=CorpusData.CorpusDataManipulator("","",indicator)
@@ -48,7 +38,6 @@ class DiagInquryer:
 
     def voting(self,result):
         result = list(map(lambda x:[x[0],math.tan(x[1]*math.pi/2)],result))
-        print(result)
         voted={}
         for i in result:
             if i[0] not in list(voted.keys()):
@@ -62,9 +51,6 @@ class DiagInquryer:
             model=self.lsi
         if corpusMani is None:
             corpusMani=self.corpusMani
-
-        logging.info([x for x in TFIDFSplitter.split(diagnosis)])
-        #DiagVec=corpusMani.doc2bow(list(filter(lambda x: x not in self.stopword,jiebaCutAll(diagnosis,False))))
         DiagVec=corpusMani.doc2bow(TFIDFSplitter.split(diagnosis))
 
 
@@ -93,7 +79,6 @@ class DiagInqury:
         self.dispatcher={}
         self.inquryer=DiagInquryer()
         self.dispatcher['diagQuery']=lambda ins:list(map(lambda x:tuple([x[0],1.*x[1]]),self.inquryer.inquryDiagnosis(ins['diag'])))
-        #self.dispatcher['retrain']=lambda ins:self.inquryer.retrain()
         self.dispatcher['addDocuments']=lambda ins: self.addDocs(ins)
         self.dispatcher['getSentenceCut']=lambda ins:self.inquryer.cutDiag(ins['sentence'])
         self.dispatcher['SaveProfiles']=lambda ins:self.SaveProfiles()
@@ -104,20 +89,12 @@ class DiagInqury:
         return 0
 
     def inqury(self,ins):
-        logging.info(ins)
-        #logging.info(self.dispatcher[ins['instruction']])
         return self.dispatcher[ins['instruction']](ins)
 
     def addDocs(self,ins):
         wordVecs=list(map(TFIDFSplitter.split,ins['docs']))
-        #print([x for x in wordVecs])#get word Vector
         self.inquryer.corpusMani.addVecToDic(wordVecs)
         idVecs=[self.inquryer.corpusMani.doc2bow(x) for x in wordVecs]
-        #print(idVecs)
-
-        diagCodeDic=dict(map(tuple,(map(lambda x,y:[",".join(TFIDFSplitter.split(x)),y],ins['docs'],ins['code']))))
-        #diagnosesData.diagnosesManipulator.diagCodeDic.update(diagCodeDic)
-        
         addedVec=self.inquryer.corpusMani.addVecToCorpus(idVecs,ins['code'])
         self.inquryer.addDocuments(addedVec)
         self.inquryer.retrain()
