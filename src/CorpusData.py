@@ -21,9 +21,10 @@ class CorpusDataManipulator:
             self.dictionary=corpora.Dictionary.load(dataManipulator.dataManipulator.conf["path"]["dictionary"])
             print(self.dictionary)
             #time.sleep(10)
-            with open(dataManipulator.dataManipulator.conf["path"]["corpus"]) as f:
+            '''with open(dataManipulator.dataManipulator.conf["path"]["corpus"]) as f:
                 self.corpusWithoutDuplicate=json.loads(f.readline())
-                self.corpusWithoutDuplicate=list(map(lambda x:list(map(lambda y:tuple(y),x)),self.corpusWithoutDuplicate))
+                self.corpusWithoutDuplicate=list(map(lambda x:list(map(lambda y:tuple(y),x)),self.corpusWithoutDuplicate))'''
+            self.corpusWithoutDuplicate=list(corpora.MmCorpus(dataManipulator.dataManipulator.conf["path"]["corpus"]))#'/tmp/corpus.mm'))
             with open(dataManipulator.dataManipulator.conf["path"]["codes"]) as f:
                 self.codeWithoutDuplicate=json.loads(f.readline())
             
@@ -66,8 +67,9 @@ class CorpusDataManipulator:
     
     def saveCorpusAndCodes(self):
         self.dictionary.save(dataManipulator.dataManipulator.conf["path"]["dictionary"])
-        with open(dataManipulator.dataManipulator.conf["path"]["corpus"],"w") as f:
-            f.write(json.dumps(self.corpusWithoutDuplicate))
+        '''with open(dataManipulator.dataManipulator.conf["path"]["corpus"],"w") as f:
+            f.write(json.dumps(self.corpusWithoutDuplicate))'''
+        corpora.MmCorpus.serialize(dataManipulator.dataManipulator.conf["path"]["corpus"], self.corpusWithoutDuplicate)
         with open(dataManipulator.dataManipulator.conf["path"]["codes"],"w") as f:
             f.write(json.dumps(self.codeWithoutDuplicate))
         logging.info("corpusinfoSaved")

@@ -10,10 +10,10 @@ class LsiModel:
 
 
         if loadFromFile:
-            tmp_fname = get_tmpfile("lsi.model")
-            self.lsiModel=models.LsiModel.load(tmp_fname)
-            #self.lsiModel=models.LsiModel.load(dataManipulator.dataManipulator.conf["path"]["LsiModel"])
-            self.lsiModel.id2word=corpusManipulator.dictionary
+            #tmp_fname = get_tmpfile("lsi.model")
+            #self.lsiModel=models.LsiModel.load(tmp_fname)
+            self.lsiModel=models.LsiModel.load(dataManipulator.dataManipulator.conf["path"]["LsiModel"])
+            #self.lsiModel.id2word=corpusManipulator.dictionary
         else:
             self.lsiModel=models.LsiModel(corpusManipulator.getCorpus(), id2word=corpusManipulator.dictionary, num_topics=256)
         self.corpusTimeStamp=0#corpusManipulator.corpusTimeStamp
@@ -28,7 +28,9 @@ class LsiModel:
     def versionProcceed(self):
         self.corpusTimeStamp=self.corpusManipulator.corpusTimeStamp
     def addDocuments(self,corpus):#add documents to Lsi Model
+        self.lsiModel.id2word=self.corpusManipulator.dictionary
         self.lsiModel.add_documents(corpus)
+        
         self.reindex()
         '''if self.isModelUpdated():
             self.lsiModel.add_documents(self.corpusManipulator.corpus)
@@ -55,7 +57,7 @@ class LsiModel:
         return sims
     
     def saveProfile(self):
-        tmp_fname = get_tmpfile("lsi.model")
-        self.dictionary.save(tmp_fname)#dataManipulator.dataManipulator.conf["path"]["LsiModel"])
+        #tmp_fname = get_tmpfile("lsi.model")
+        self.lsiModel.save(dataManipulator.dataManipulator.conf["path"]["LsiModel"])
         logging.info("LsiModel saved")
         return 0

@@ -7,7 +7,7 @@ import jieba
 import time
 from gensim.test.utils import get_tmpfile
 import dataManipulator
-import diagnosesData
+#import diagnosesData
 import json
 from pathlib import Path
 import math
@@ -26,8 +26,8 @@ class DiagInquryer:
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
-        tmp_fname = get_tmpfile("lsi.model")
-        indicator=Path(tmp_fname).exists()#dMani.conf["path"]["LsiModel"]).exists()
+        #tmp_fname = get_tmpfile("lsi.model")
+        indicator=Path(dMani.conf["path"]["LsiModel"]).exists()
         if indicator:
             self.corpusMani=CorpusData.CorpusDataManipulator("","",indicator)
             self.lsi=LsiModel.LsiModel(self.corpusMani,indicator)
@@ -116,7 +116,7 @@ class DiagInqury:
         #print(idVecs)
 
         diagCodeDic=dict(map(tuple,(map(lambda x,y:[",".join(TFIDFSplitter.split(x)),y],ins['docs'],ins['code']))))
-        diagnosesData.diagnosesManipulator.diagCodeDic.update(diagCodeDic)
+        #diagnosesData.diagnosesManipulator.diagCodeDic.update(diagCodeDic)
         
         addedVec=self.inquryer.corpusMani.addVecToCorpus(idVecs,ins['code'])
         self.inquryer.addDocuments(addedVec)
