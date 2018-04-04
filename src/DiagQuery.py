@@ -8,7 +8,7 @@ import time
 import initializer
 from gensim.test.utils import get_tmpfile
 import dataManipulator
-#import diagnosesData
+import diagnosesData
 import json
 from pathlib import Path
 import math
@@ -98,3 +98,5 @@ class DiagInqury:
         addedVec=self.inquryer.corpusMani.addVecToCorpus(idVecs,ins['code'])
         self.inquryer.addDocuments(addedVec)
         self.inquryer.retrain()
+        diagnosesData.diagnosesManipulator.extendDiagnoses([ins['docs'],ins['code']])
+        diagnosesData.diagnosesManipulator.writeDiagsToDisk()

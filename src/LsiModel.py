@@ -15,7 +15,7 @@ class LsiModel:
             self.lsiModel=models.LsiModel.load(dataManipulator.dataManipulator.conf["path"]["LsiModel"])
             #self.lsiModel.id2word=corpusManipulator.dictionary
         else:
-            self.lsiModel=models.LsiModel(corpusManipulator.getCorpus(), id2word=corpusManipulator.dictionary, num_topics=256)
+            self.lsiModel=models.LsiModel(corpusManipulator.getCorpus(), onepass=False,id2word=corpusManipulator.dictionary, num_topics=256)
         self.corpusTimeStamp=0#corpusManipulator.corpusTimeStamp
         self.corpusManipulator=corpusManipulator
         self.dictionary=corpusManipulator.dictionary
