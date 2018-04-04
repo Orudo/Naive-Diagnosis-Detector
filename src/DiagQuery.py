@@ -37,7 +37,7 @@ class DiagInquryer:
             self.lsi=LsiModel.LsiModel(self.corpusMani,indicator)#get LSI Model
 
     def voting(self,result):
-        result = list(map(lambda x:[x[0],math.tan(x[1]*math.pi/2)],result))
+        result = list(map(lambda x:[x[0],math.tan(x[1]*0.999999999999999999*math.pi/2)],result))
         voted={}
         for i in result:
             if i[0] not in list(voted.keys()):
@@ -96,6 +96,8 @@ class DiagInqury:
         self.inquryer.corpusMani.addVecToDic(wordVecs)
         idVecs=[self.inquryer.corpusMani.doc2bow(x) for x in wordVecs]
         addedVec=self.inquryer.corpusMani.addVecToCorpus(idVecs,ins['code'])
+        if len(addedVec)==0:
+            return 0
         self.inquryer.addDocuments(addedVec)
         self.inquryer.retrain()
         diagnosesData.diagnosesManipulator.extendDiagnoses([ins['docs'],ins['code']])
