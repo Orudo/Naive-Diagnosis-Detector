@@ -9,7 +9,7 @@ validationData=json.loads(tests)
 #print(validationData)
 
 
-cnt=0
+'''cnt=0
 cnt_all=0
 for i in validationData:
     conditionsSetURL = 'http://127.0.0.1:8080'
@@ -29,9 +29,9 @@ for i in validationData:
             print(i[0])
         cnt_all+=1
 
-print(cnt/cnt_all)
+print(cnt/cnt_all)'''
         
-'''conditionsSetURL = 'http://127.0.0.1:8080'
+conditionsSetURL = 'http://127.0.0.1:8080'
 #newConditions = {'instruction':"diagQuery",'diag':"外眦至颞部、左耳屏、左颞皮肤挫裂伤"} 
 newConditions = {'instruction':"addDocuments",'docs':["右上唇裂伤"],'code':['S01.500']} 
 params = json.dumps(newConditions).encode('utf8')
@@ -39,12 +39,12 @@ req = urllib.request.Request(conditionsSetURL, data=params,headers={'content-typ
 response = urllib.request.urlopen(req)
 print(response.read().decode('utf8'))
 conditionsSetURL = 'http://127.0.0.1:8080'
-newConditions = {'instruction':"diagQuery",'diag':"右上唇裂伤"} 
+newConditions = {'instruction':"SaveProfiles"} 
 #newConditions = {'instruction':"addDocument",'doc':"额骨多发骨折",'code':'S02.001'} 
 params = json.dumps(newConditions).encode('utf8')
 req = urllib.request.Request(conditionsSetURL, data=params,headers={'content-type': 'application/json'})
 response = urllib.request.urlopen(req)
-print(response.read().decode('utf8'))'''
+print(response.read().decode('utf8'))
 '''conditionsSetURL = 'http://127.0.0.1:8080'
 #newConditions = {'instruction':"diagQuery",'diag':"外眦至颞部、左耳屏、左颞皮肤挫裂伤"} 
 newConditions = {'instruction':"retrain"} 

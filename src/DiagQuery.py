@@ -5,9 +5,11 @@ import TFIDFSplitter
 import logging
 import jieba
 import time
+from gensim.test.utils import get_tmpfile
 import dataManipulator
 import diagnosesData
 import json
+from pathlib import Path
 import math
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -19,23 +21,30 @@ class DiagInquryer:
         self.conf=conf
 
     def __init__(self):
-        dMani=dataManipulator.dataManipulator()
+        dMani=dataManipulator.dataManipulator
         jieba.load_userdict(dMani.conf["path"]["jiebaDic"])
         logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-        trainingSet=json.loads(open(dMani.conf["path"]["trainingSet"]).read())
-        self.codes=list(map(lambda x:x[1],trainingSet))
-        contents=list(map(lambda x:x[0],trainingSet))
 
-        with open(dMani.conf["path"]["stopwordList"]) as f:
-            stopword=f.readlines()
-        self.stopword=[x.strip() for x in stopword]
-       
-        for i in range(0,len(contents)):
-            contents[i]=TFIDFSplitter.split(contents[i])
-        self.corpusMani=CorpusData.CorpusDataManipulator(contents,self.codes)#build all corpus Manipulator
+        tmp_fname = get_tmpfile("lsi.model")
+        indicator=Path(tmp_fname).exists()#dMani.conf["path"]["LsiModel"]).exists()
+        if indicator:
+            self.corpusMani=CorpusData.CorpusDataManipulator("","",indicator)
+            self.lsi=LsiModel.LsiModel(self.corpusMani,indicator)
+        else:
+            trainingSet=json.loads(open(dMani.conf["path"]["trainingSet"]).read())
+            self.codes=list(map(lambda x:x[1],trainingSet))
+            contents=list(map(lambda x:x[0],trainingSet))
 
-        self.lsi=LsiModel.LsiModel(self.corpusMani)#get LSI Model
+            with open(dMani.conf["path"]["stopwordList"]) as f:
+                stopword=f.readlines()
+            self.stopword=[x.strip() for x in stopword]
+        
+            for i in range(0,len(contents)):
+                contents[i]=TFIDFSplitter.split(contents[i])
+            self.corpusMani=CorpusData.CorpusDataManipulator(contents,self.codes,indicator)#build all corpus Manipulator
+
+            self.lsi=LsiModel.LsiModel(self.corpusMani,indicator)#get LSI Model
 
     def voting(self,result):
         result = list(map(lambda x:[x[0],math.tan(x[1]*math.pi/2)],result))
@@ -90,8 +99,8 @@ class DiagInqury:
         self.dispatcher['SaveProfiles']=lambda ins:self.SaveProfiles()
         
     def SaveProfiles(self):
-        #self.inquryer.corpusMani.saveCorpusAndCodes()
-        #self.inquryer.lsi.
+        self.inquryer.corpusMani.saveCorpusAndCodes()
+        self.inquryer.lsi.saveProfile()
         return 0
 
     def inqury(self,ins):

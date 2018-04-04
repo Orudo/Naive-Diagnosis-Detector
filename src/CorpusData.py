@@ -1,4 +1,8 @@
 from gensim import corpora
+import dataManipulator
+import json
+import logging
+import time
 
 def removeDuplicate(myList,codeList):
     res=list()
@@ -11,26 +15,38 @@ def removeDuplicate(myList,codeList):
 
 
 class CorpusDataManipulator:
-    def __init__(self,wordVecs,correspondingCodes):
-        self.dictionary=corpora.Dictionary(wordVecs)
-        self.corpus = [self.dictionary.doc2bow(x) for x in wordVecs]
-        self.corpusWithoutDuplicate, self.codeWithoutDuplicate = removeDuplicate(self.corpus,correspondingCodes)
-        #self.corpus = set(map(tuple,map(self.dictionary.doc2bow,wordVecs)))
-        #print(self.corpus)
+    def __init__(self,wordVecs,correspondingCodes,loadFromFile):
+        if loadFromFile:
+            #self.dictionary=corpora.Dictionary()
+            self.dictionary=corpora.Dictionary.load(dataManipulator.dataManipulator.conf["path"]["dictionary"])
+            print(self.dictionary)
+            #time.sleep(10)
+            with open(dataManipulator.dataManipulator.conf["path"]["corpus"]) as f:
+                self.corpusWithoutDuplicate=json.loads(f.readline())
+                self.corpusWithoutDuplicate=list(map(lambda x:list(map(lambda y:tuple(y),x)),self.corpusWithoutDuplicate))
+            with open(dataManipulator.dataManipulator.conf["path"]["codes"]) as f:
+                self.codeWithoutDuplicate=json.loads(f.readline())
+            
+            self.tokenAmount=len(self.dictionary.items())
+        else:
+            self.dictionary=corpora.Dictionary(wordVecs)
+            self.corpus = [self.dictionary.doc2bow(x) for x in wordVecs]
+            self.corpusWithoutDuplicate, self.codeWithoutDuplicate = removeDuplicate(self.corpus,correspondingCodes)
+            self.tokenAmount=len(self.dictionary.items())
         self.corpusTimeStamp=0
-        self.tokenAmount=len(self.dictionary.items())
+        #print(self.dictionary)
+            
+        #print(self.dictionary.id2token)
+        #time.sleep(20)
+
     def stepForward(self):
         self.corpusTimeStamp+=1
             
     def addVecToDic(self,wordVecs):
         self.dictionary.add_documents(wordVecs)
-        '''if len(self.dictionary.items())>self.tokenAmount:
-            self.stepForward()'''
-        #self.addVecToCorpus(self.doc2bow(wordVec))
     def doc2bow(self,wordVec):
         return self.dictionary.doc2bow(wordVec)
     def addVecToCorpus(self,idVecs,codes):
-        #self.corpus.update(map(tuple(idVecs)))
         idVecs, codes=removeDuplicate(idVecs,codes)
         datas=list(map(lambda x,y:[x,y],idVecs,codes))
         print(datas)
@@ -47,5 +63,12 @@ class CorpusDataManipulator:
         return self.codeWithoutDuplicate[docNo]
     def getCorpus(self):
         return self.corpusWithoutDuplicate
+    
     def saveCorpusAndCodes(self):
+        self.dictionary.save(dataManipulator.dataManipulator.conf["path"]["dictionary"])
+        with open(dataManipulator.dataManipulator.conf["path"]["corpus"],"w") as f:
+            f.write(json.dumps(self.corpusWithoutDuplicate))
+        with open(dataManipulator.dataManipulator.conf["path"]["codes"],"w") as f:
+            f.write(json.dumps(self.codeWithoutDuplicate))
+        logging.info("corpusinfoSaved")
         return 0
